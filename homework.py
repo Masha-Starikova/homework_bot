@@ -43,7 +43,7 @@ def send_message(bot, message):
 
 
 def get_api_answer(current_timestamp):
-    """
+    """.
     Делаем запрос к эндпоинту API,
     в случае успешного ответа - возвращаем ответ.
     """
@@ -67,7 +67,7 @@ def get_api_answer(current_timestamp):
 
 
 def check_response(response):
-    """
+    """.
     Проверяем ответ API. В случае корректности -
     возвращаем 'homeworks'.
     """
@@ -78,7 +78,7 @@ def check_response(response):
 
 
 def parse_status(homework):
-    """
+    """.
     Извлекаем из 'homeworks' статус и,
     в случае успеха, возвращаем вердикт.
     """
