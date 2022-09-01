@@ -5,7 +5,7 @@ import os
 import logging
 import sys
 import telegram
-from dotenv import load_dotenv 
+from dotenv import load_dotenv
 from telegram import Bot
 from exceptions import IncorrectHttpStatus
 
@@ -13,7 +13,7 @@ from exceptions import IncorrectHttpStatus
 load_dotenv()
 
 
-PRACTICUM_TOKEN =  os.getenv('PRACTICUM_TOKEN')
+PRACTICUM_TOKEN = os.getenv('PRACTICUM_TOKEN')
 TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
 TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
 
@@ -29,11 +29,12 @@ HOMEWORK_STATUSES = {
 }
 logging.basicConfig(
     level=logging.DEBUG,
-    filename='program.log', 
+    filename='program.log',
     format='%(asctime)s, %(levelname)s, %(message)s'
 )
 handler = logging.StreamHandler(stream=sys.stdout)
 logger = logging.getLogger(__name__)
+
 
 def send_message(bot, message):
     """Отправляем сообщение в чат."""
@@ -62,8 +63,9 @@ def get_api_answer(current_timestamp):
     if response.status_code != HTTPStatus.OK:
         logger.error('недоступность эндпоинта')
         raise Exception('недоступность эндпоинта')
-
     return response.json()
+
+
 def check_response(response):
     """
     Проверяем ответ API. В случае корректности -
@@ -73,7 +75,7 @@ def check_response(response):
         return response['homeworks']
     else:
         raise Exception
-   
+
 
 def parse_status(homework):
     """
@@ -111,7 +113,7 @@ def main():
                 )
                 homeworks = check_response(response)
                 if len(homeworks) == 0:
-                   logger.debug('В ответе сервера отсутсвуют новые записи.')
+                    logger.debug('В ответе сервера отсутсвуют новые записи.')
                 new_status = homeworks[0].get('status')
                 message = parse_status(homeworks[0])
                 if new_status != status:
@@ -128,5 +130,7 @@ def main():
                     send_message(bot, message)
             finally:
                 time.sleep(RETRY_TIME)
+
+
 if __name__ == '__main__':
     main()
