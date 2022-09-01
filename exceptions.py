@@ -1,0 +1,2 @@
+class IncorrectHttpStatus(Exception):
+    pass
