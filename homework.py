@@ -40,10 +40,9 @@ def send_message(bot, message):
     """Отправляем сообщение в чат."""
     try:
         bot.send_message(TELEGRAM_CHAT_ID, message)
+        logger.info(f'В телеграмм отправлено сообщение: {message}')
     except exceptions.SendMessageFailure:
         raise exceptions.SendMessageFailure('Сообщения не отправлены')
-    else:
-        logger.info(f'В телеграмм отправлено сообщение: {message}')
 
 
 def get_api_answer(current_timestamp):
@@ -59,14 +58,12 @@ def get_api_answer(current_timestamp):
             headers=HEADERS,
             params=params
         )
+        logger.info('Мы начали запрос к API.')
     except exceptions.IncorrectHttpStatus as err:
         raise exceptions.IncorrectHttpStatus(
             f'Ошибка при запросе к основному API:{err}'
         )
-    else:
-        logger.info('Мы начали запрос к API.')
     if response.status_code != HTTPStatus.OK:
-        logger.error('недоступность эндпоинта')
         raise Exception('недоступность эндпоинта')
     return response.json()
 
@@ -78,17 +75,10 @@ def check_response(response):
     """
     if not isinstance(response, dict):
         raise TypeError('Ответ API отличен от словаря')
-    try:
-        homeworks = response.get('homeworks')
-    except KeyError as error:
-        logger.error(f'Ошибка доступа по ключу homeworks: {error}')
-        raise KeyError(f'Ошибка доступа по ключу homeworks: {error}')
-    if 'homeworks' not in response:
-        if 'current_date' not in response:
-            logger.error('Список домашних работ пуст')
-            raise TypeError('Список домашних работ пуст')
+    homeworks = response.get('homeworks')
+    if 'homeworks' and 'current_date' not in response:
+        raise TypeError('Список домашних работ пуст')
     if not isinstance(homeworks, list):
-        logger.error('Данные не читаемы')
         raise exceptions.IncorrectFormatResponse('Данные не читаемы')
     return homeworks
 
@@ -119,26 +109,23 @@ def main():
     bot = telegram.Bot(token=TELEGRAM_TOKEN)
     current_timestamp = int(time.time())
     if check_tokens() is False:
-        sys.exit()
+        sys.exit('Ошибка. Небыли получены необходимые данные.')
     while True:
         try:
             response = get_api_answer(current_timestamp)
             homeworks = check_response(response)
-            for homework in homeworks:
-                last_homework = {
-                    homework['homework_name']: homework['status']
-                }
-                message = parse_status(homework)
-                if last_homework != homework['status']:
-                    send_message(bot, message)
+            if homeworks:
+                if homeworks[0].get('status') is not None:
+                    print(homeworks[0].get('status'))
                     logger.info('Сообщение было отправлено')
+                    message = parse_status(homeworks[0])
                 else:
                     logger.debug('Статус не изменился')
                     message = ('Статус не был изменён')
-                    bot.send_message(chat_id=TELEGRAM_CHAT_ID, text=message)
+                send_message(bot, message)
         except Exception as error:
             message = f'Сбой в работе программы: {error}'
-            bot.send_message(chat_id=TELEGRAM_CHAT_ID, text=message)
+            send_message(bot, message)
         finally:
             time.sleep(RETRY_TIME)
 
