@@ -115,17 +115,17 @@ def main():
             response = get_api_answer(current_timestamp)
             homeworks = check_response(response)
             if homeworks:
-                last_homework = { 
-                    homeworks['homework_name']: homeworks['status'] 
-                } 
+                last_homework = {
+                    homeworks['homework_name']: homeworks['status']
+                }
                 if last_homework != homeworks['status']:
                     logger.info('Сообщение было отправлено')
                     message = parse_status(homeworks[0])
                 else:
                     logger.debug('Статус не изменился')
                     message = ('Статус не был изменён')
-            else: 
-                logger.debug('Домашней работы нет.') 
+            else:
+                logger.debug('Домашней работы нет.')
                 message = ('Домашней работы нет.')
                 send_message(bot, message)
         except Exception as error:
