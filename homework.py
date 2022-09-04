@@ -53,12 +53,12 @@ def get_api_answer(current_timestamp):
     timestamp = current_timestamp or int(time.time())
     params = {'from_date': timestamp}
     try:
+        logger.info('Мы начали запрос к API.')
         response = requests.get(
             ENDPOINT,
             headers=HEADERS,
             params=params
         )
-        logger.info('Мы начали запрос к API.')
     except exceptions.IncorrectHttpStatus as err:
         raise exceptions.IncorrectHttpStatus(
             f'Ошибка при запросе к основному API:{err}'
@@ -115,13 +115,18 @@ def main():
             response = get_api_answer(current_timestamp)
             homeworks = check_response(response)
             if homeworks:
-                if homeworks[0].get('status') is not None:
-                    print(homeworks[0].get('status'))
+                last_homework = { 
+                    homeworks['homework_name']: homeworks['status'] 
+                } 
+                if last_homework != homeworks['status']:
                     logger.info('Сообщение было отправлено')
                     message = parse_status(homeworks[0])
                 else:
                     logger.debug('Статус не изменился')
                     message = ('Статус не был изменён')
+            else: 
+                logger.debug('Домашней работы нет.') 
+                message = ('Домашней работы нет.')
                 send_message(bot, message)
         except Exception as error:
             message = f'Сбой в работе программы: {error}'
