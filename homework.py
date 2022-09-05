@@ -39,10 +39,12 @@ logger = logging.getLogger(__name__)
 def send_message(bot, message):
     """Отправляем сообщение в чат."""
     try:
+        logger.info('Мы начали отправку сообщения.')
         bot.send_message(TELEGRAM_CHAT_ID, message)
-        logger.info(f'В телеграмм отправлено сообщение: {message}')
     except exceptions.SendMessageFailure:
         raise exceptions.SendMessageFailure('Сообщения не отправлены')
+    else:
+        logger.info(f'В телеграмм отправлено сообщение: {message}')
 
 
 def get_api_answer(current_timestamp):
